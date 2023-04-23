@@ -32,7 +32,9 @@ class CarRacingEnv(base.PyGameWrapper):
 
         actions = {
             0: pygame.K_a,
-            1: pygame.K_d
+            1: pygame.K_d,
+            2: pygame.K_w,
+            3: pygame.K_s
         }
 
         base.PyGameWrapper.__init__(self, width, height, actions=actions)
@@ -42,6 +44,8 @@ class CarRacingEnv(base.PyGameWrapper):
         self.game_over_flag = False
         self.car = Car(CAR_SRC, 0, SCREEN_WIDTH / 2 - CAR_WIDTH / 2, SCREEN_HEIGHT - 80)
         self.car.speed = 5
+        self.car.max_speed = 10
+        self.car.acceleration = 2
         self.map = Map(MAP_SRC)
         self.sensors = Sensors(self.car, self.map, self.screen)
         self.measurement = []
@@ -72,6 +76,10 @@ class CarRacingEnv(base.PyGameWrapper):
                     self.car.wheel -= 0.5
                 if key == self.actions[1]:
                     self.car.wheel += 0.5
+                if key == self.actions[2]:
+                    self.car.speed = min(self.car.speed + self.car.acceleration, self.car.max_speed)
+                if key == self.actions[3]:
+                    self.car.speed = max(self.car.speed - self.car.acceleration, -self.car.max_speed/2)
 
     def step(self, dt):
         self.screen.fill(WHITE)
@@ -79,11 +87,6 @@ class CarRacingEnv(base.PyGameWrapper):
         self.score += self.rewards["tick"]
         self.car.blit(self.screen, dt)
         self.map.blit(self.screen)
-
-        # for sensor in self.sensors.sensors:
-        #     sensor.measure()
-        #     sensor.blit()
-            # print("Sensors: ", sensor.deg_x, sensor.deg_y)
 
         # sensors.measure()
         self.measurement = self.sensors.measure(SHOW_SENSOR)
