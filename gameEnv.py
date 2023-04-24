@@ -17,7 +17,7 @@ CAR_LENGTH = 10
 CAR_WIDTH = 10
 
 # Map
-MAP_SRC = "img/map-1.png"
+MAP_SRC = "img/map-2.png"
 
 
 # Colors
@@ -31,10 +31,10 @@ class CarRacingEnv(base.PyGameWrapper):
     def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
 
         actions = {
-            0: pygame.K_a,
-            1: pygame.K_d,
-            2: pygame.K_w,
-            3: pygame.K_s
+            0: pygame.K_LEFT,
+            1: pygame.K_RIGHT
+            # 2: pygame.K_UP
+            # 3: pygame.K_DOWN
         }
 
         base.PyGameWrapper.__init__(self, width, height, actions=actions)
@@ -42,7 +42,8 @@ class CarRacingEnv(base.PyGameWrapper):
     def init(self):
         self.score = 0
         self.game_over_flag = False
-        self.car = Car(CAR_SRC, 0, SCREEN_WIDTH / 2 - CAR_WIDTH / 2, SCREEN_HEIGHT - 80)
+        # self.car = Car(CAR_SRC, 0, SCREEN_WIDTH / 2 - CAR_WIDTH / 2, SCREEN_HEIGHT - 60)
+        self.car = Car(CAR_SRC, 0, 650, 535)
         self.car.speed = 5
         self.car.max_speed = 10
         self.car.acceleration = 2
@@ -58,7 +59,6 @@ class CarRacingEnv(base.PyGameWrapper):
         state = {
             "sensors": self.measurement
         }
-        # # print("StateValues: ", state)
         return state
 
     def game_over(self):
@@ -76,15 +76,15 @@ class CarRacingEnv(base.PyGameWrapper):
                     self.car.wheel -= 0.5
                 if key == self.actions[1]:
                     self.car.wheel += 0.5
-                if key == self.actions[2]:
-                    self.car.speed = min(self.car.speed + self.car.acceleration, self.car.max_speed)
-                if key == self.actions[3]:
-                    self.car.speed = max(self.car.speed - self.car.acceleration, -self.car.max_speed/2)
+                # if key == self.actions[2]:
+                #     self.car.speed = min(self.car.speed + self.car.acceleration, self.car.max_speed)
+                # if key == self.actions[3]:
+                #     self.car.speed = max(self.car.speed - self.car.acceleration, -self.car.max_speed/2)
 
     def step(self, dt):
         self.screen.fill(WHITE)
         self._handle_player_events()
-        self.score += self.rewards["tick"]
+        # self.score += self.rewards["tick"]
         self.car.blit(self.screen, dt)
         self.map.blit(self.screen)
 
@@ -93,9 +93,11 @@ class CarRacingEnv(base.PyGameWrapper):
 
         if self.map.img_mask.overlap(self.car.img_mask, (int(self.car.x), int(self.car.y))) is not None:
             self.game_over_flag = True
+            self.score += self.rewards["loss"]
         else:
-            self.score += 1
-
+            # self.score += 1
+            self.score += self.rewards["positive"]
+            pass
 
 
 if __name__ == "__main__":
@@ -110,6 +112,8 @@ if __name__ == "__main__":
         dt = game.clock.tick_busy_loop(30)
         if game.game_over():
             game.reset()
+            print("Over:")
 
         game.step(dt)
         pygame.display.update()
+        print("\nScore: ", game.score)

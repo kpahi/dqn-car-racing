@@ -38,10 +38,10 @@ class Sensors:
                 # https://stackoverflow.com/questions/62008457/overlap-between-mask-and-fired-beams-in-pygame-ai-car-model-vision
                 if self.circuit.img_mask.overlap(pygame.mask.from_surface(line_surface),
                                                 (int(line_rect[0]), int(line_rect[1]))) is not None:
-                    self.measurement = len
                     break
                 len += 1
+            measurements.append(len/1000)
             if show_sensor:
                 pygame.draw.line(self.screen, (255,255, 0), (car_center_x, car_center_y), (deg_x, deg_y), 2)
-            measurements.append(len)
+            
         return measurements
