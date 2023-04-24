@@ -32,7 +32,8 @@ class CarRacingEnv(base.PyGameWrapper):
 
         actions = {
             0: pygame.K_LEFT,
-            1: pygame.K_RIGHT
+            1: pygame.K_RIGHT,
+            2: None
             # 2: pygame.K_UP
             # 3: pygame.K_DOWN
         }
@@ -43,7 +44,7 @@ class CarRacingEnv(base.PyGameWrapper):
         self.score = 0
         self.game_over_flag = False
         # self.car = Car(CAR_SRC, 0, SCREEN_WIDTH / 2 - CAR_WIDTH / 2, SCREEN_HEIGHT - 60)
-        self.car = Car(CAR_SRC, 0, 650, 535)
+        self.car = Car(CAR_SRC, 0, 200, 535)
         self.car.speed = 5
         self.car.max_speed = 10
         self.car.acceleration = 2
@@ -94,6 +95,7 @@ class CarRacingEnv(base.PyGameWrapper):
         if self.map.img_mask.overlap(self.car.img_mask, (int(self.car.x), int(self.car.y))) is not None:
             self.game_over_flag = True
             self.score += self.rewards["loss"]
+            self.score += -20
         else:
             # self.score += 1
             self.score += self.rewards["positive"]

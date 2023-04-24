@@ -4,7 +4,7 @@ import time
 import numpy as np
 import random
 from keras.layers import Dense, Reshape
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from tensorflow.keras.optimizers import Adam
 from collections import deque
 
@@ -14,7 +14,7 @@ learning_rate = 0.001
 epsilon = 0.99
 DISCOUNT               = 0.97
 REPLAY_MEMORY_SIZE     = 3000   # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 1000
+MIN_REPLAY_MEMORY_SIZE = 500
 MINIBATCH_SIZE = 128
 target_update_steps = 10
 
@@ -38,7 +38,7 @@ def select_action(epsilon, observation):
         action = np.argmax(a_probs)
     else:
         # Get random action between 0,1
-        action = np.random.choice(2, 1)[0]
+        action = np.random.choice(3, 1)[0]
     return action
 
 # https://github.com/ultronify/cartpole-tf-dqn/blob/master/dqn_agent.py
@@ -64,7 +64,7 @@ class DQNAgent:
         model = Sequential()
         model.add(Dense(64, input_dim=7, activation="relu"))
         model.add(Dense(64, activation="relu"))
-        model.add(Dense(2, activation="linear"))
+        model.add(Dense(3, activation="softmax"))
         model.compile(loss="mse", metrics=["accuracy"], optimizer= Adam(learning_rate=learning_rate))
         return model
 
@@ -116,8 +116,14 @@ class DQNAgent:
         # Update target network counter every episode
         if terminal_state:
             self.target_update_counter += 1
+            
+    def load(self, path):
+        self.model = load_model(path)
+        self.target_model.set_weights(self.model.get_weights()) 
+
 
 agent = DQNAgent(p)
+# agent.load("best_model_pole.h5")
 
 EPISODES=1000
 MIN_EPSILON=0.001
@@ -137,6 +143,7 @@ for episode in range(1, EPISODES+1):
     current_state = p.getGameState()
     timestep = 0
     
+    count = 0
     game_over = p.game_over()
     while not game_over:
         
@@ -149,7 +156,8 @@ for episode in range(1, EPISODES+1):
 
         # Every step we update replay memory and train main network
         agent.update_replay_memory((observation, action, r, new_state, game_over))
-        agent.train(game_over, step)
+        if count%20 == 0:
+            agent.train(game_over, step)
 
         current_state = new_state
         step += 1

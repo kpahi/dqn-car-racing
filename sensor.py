@@ -7,7 +7,7 @@ class Sensors:
         self.car = car
         self.circuit = circuit
         self.nr_of_sensors = 7
-        self.gap = 15
+        self.gap = 5
         self.sensors = self.init_sensors() # [] Sensor angle list
 
     def init_sensors(self):

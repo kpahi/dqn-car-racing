@@ -13,6 +13,9 @@ class Car(pygame.sprite.Sprite):
         self.speed = 0
         self.wheel = 0  # -1 to 1
         self.image = pygame.image.load(src)
+
+        self.image = pygame.transform.scale(self.image, (self.image.get_rect().width-10,self.image.get_rect().height-10))
+
         self.img = None
         self.img_mask = None
         self.img_rect = None
@@ -30,10 +33,10 @@ class Car(pygame.sprite.Sprite):
         elif (self.wheel < -self.max_wheel_pos):
             self.wheel = -self.max_wheel_pos
 
-
-        self.dir -= self.wheel * self.speed / 33 * dt
-        self.x += math.cos(math.radians(self.dir)) * self.speed / 33 * dt
-        self.y -= math.sin(math.radians(self.dir)) * self.speed / 33 * dt
+        speed_factor = 15
+        self.dir -= self.wheel * self.speed / speed_factor * dt
+        self.x += math.cos(math.radians(self.dir)) * self.speed / speed_factor * dt
+        self.y -= math.sin(math.radians(self.dir)) * self.speed / speed_factor * dt
 
     def blit(self, screen, dt):
         self.img = rot_center(self.image, self.dir)
